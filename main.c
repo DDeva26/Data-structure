@@ -1,76 +1,124 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<stddef.h>
+#include "stack.h"
+#include<ctype.h>
+#include<stdint.h>
 #include<assert.h>
-#include "bst.c"
+#include<stddef.h>
+#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
 
+int balancing_symbols(char c[10])
+{
+
+	Stack s = stack_new(5);
+	Stack *stk = &s;
+
+	Stack_Result res;
+	
+	for(int i=0;i<strlen(c);i++)
+	{
+		
+		if(c[i] == '[' || c[i] == '(' || c[i] == '{')
+		{
+			stk = stack_push(stk,c[i],&res);
+			continue;
+		}
+		else if(c[i] == ']' && stk->data[stk->top]=='[')
+		{
+			stk = stack_pop(stk,&res);
+			continue;
+		}
+		else if(c[i] == ')' && stk->data[stk->top]=='(')
+		{
+			stk = stack_pop(stk,&res);
+			continue;
+		}
+		else if(c[i] == '}' && stk->data[stk->top]=='{')
+		{
+			stk = stack_pop(stk,&res);
+			continue;
+		}
+		else
+		{
+			assert(stk->top==2 || stk->top == -1);
+			return 0;
+		}
+
+	}
+	stk = stack_peek(stk,&res);
+	assert(stk->top == -1);
+
+	return 0;
+}
+
+int postfix(char p[20])
+{
+	Stack s = stack_new(5);
+	Stack *stk = &s;
+
+	Stack_Result res;
+	for(int i=0;i<strlen(p);i++)
+    {
+        if(isdigit(p[i]))
+        {
+            stk=stack_push(stk,p[i],&res);
+            
+        }
+        else
+        {
+            
+            char a,b;
+            int c=0;
+            a = stk->data[stk->top];
+            stk = stack_pop(stk,&res);
+            b = stk->data[stk->top];
+            stk = stack_pop(stk,&res);
+            if(p[i]=='+')
+            {
+                
+            c = a -'0' + b - '0';
+            
+            }
+            else if(p[i]=='-')
+            {
+                c = (b-'0') - (a-'0');
+            }
+            else if(p[i]=='*')
+            {
+                c = (b-'0') * (a-'0');
+            }
+            else if(p[i]=='/')
+            {
+                c = (b-'0')/(a-'0');
+            }
+           
+
+            char pf = c+'0';
+            stk = stack_push(stk,pf,&res);
+
+
+            
+        }
+    }
+
+
+stk = stack_peek(stk,&res);
+assert(res.data=='6');
+
+
+}
 
 int main()
 {
-Tree bst = tree_new();
-Tree *tree = &bst;
-//1. Design a BST class with methods to add element, search element, number of elements and delete requested element
-tree = add_node(tree,50);
-tree = add_node(tree,20);
-tree = add_node(tree,30);
-tree = add_node(tree,60);
-tree = add_node(tree,70);
-tree = add_node(tree,35);
-tree = add_node(tree,40);
+	char c[10] = "}((]";
+	char c1[20] = "[({})]";
 
-assert(tree->count == 7);
+    balancing_symbols(c);
+	balancing_symbols(c1);
 
-assert(lookup(tree,50)==1);
-assert(lookup(tree,90)==0);
-
-tree = delete_node(tree,35);
-assert(tree->count == 6);
-
-tree = delete_node(tree,35);
-
-
-//2. Add methods to in-order, pre-order, post-order and level-order traversals
-printf("In-order: ");
-tree_inorder(tree); 
-printf("\nPre-order: ");
-tree_preorder(tree);
-printf("\nPost-order: ");
-tree_postorder(tree);
-
-//3. Add method to find the height of binary search tree
-
-assert(tree_height(tree)==4);
-
-//4. Add method to count the number of terminal nodes in BST
-
-assert(terminal_nodes(tree)==2);
-tree = add_node(tree,25);
-
-assert(terminal_nodes(tree)==3);
-tree = add_node(tree,55);
-
-assert(terminal_nodes(tree)==4);
-tree = add_node(tree,58);
-assert(terminal_nodes(tree)==4);
-
-
-//5. Add methods to find max and min element in BST
-
-assert(find_min(tree)==20);
-assert(find_max(tree)==70);
-
-//6. Add method to display elements in ascending order
-printf("\n");
-printf("Ascending Order: ");
-tree_ascending(tree);
-//7. Add method to display elements in descending order
-
-printf("\n");
-printf("Descending Order: "); 
-tree_descending(tree); 
-
-
-
-return 0 ;
+    
+	char p[20]="423+1*+3-";
+	postfix(p);
+	return 0;
 
 }
